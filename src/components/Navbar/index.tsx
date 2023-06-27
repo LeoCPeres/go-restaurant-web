@@ -25,11 +25,13 @@ export function Navbar() {
         colorScheme="none"
         transition={"filter 0.2s"}
         _hover={{ filter: "brightness(0.9)" }}
+        paddingY="16px"
+        paddingX="24px"
+        gap="8px"
+        textAlign="center"
       >
-        <Text paddingY="16px" paddingX="24px" fontSize="16px">
-          Novo prato
-        </Text>
-        <Image src="/icons/plus.svg" alt="plus" width={8} height={8} />
+        <Text fontSize="16px">Novo Prato</Text>
+        <Image src="/icons/plus.svg" alt="plus" width={6} height={6} />
       </Button>
     </Flex>
   );
