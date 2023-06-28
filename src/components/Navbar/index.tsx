@@ -4,7 +4,11 @@ import { colors } from "@/styles/colors";
 import { Image } from "@chakra-ui/next-js";
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 
-export function Navbar() {
+type NavbarProps = {
+  onModalOpen: (isEditing: boolean) => void;
+};
+
+export function Navbar({ onModalOpen }: NavbarProps) {
   return (
     <Flex
       justify="space-between"
@@ -29,6 +33,7 @@ export function Navbar() {
         paddingX="24px"
         gap="8px"
         textAlign="center"
+        onClick={() => onModalOpen(false)}
       >
         <Text fontSize="16px">Novo Prato</Text>
         <Image src="/icons/plus.svg" alt="plus" width={6} height={6} />

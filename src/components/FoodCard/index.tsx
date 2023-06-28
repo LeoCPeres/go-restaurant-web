@@ -17,9 +17,20 @@ import {
   Image,
   Flex,
   Switch,
+  useDisclosure,
 } from "@chakra-ui/react";
 
-export function FoodCard() {
+type FoodCardProps = {
+  onModalOpen: (isEditing: boolean) => void;
+};
+
+export function FoodCard({ onModalOpen }: FoodCardProps) {
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+
   return (
     <Card maxW="sm" borderRadius="8px">
       <Image
@@ -46,7 +57,7 @@ export function FoodCard() {
       <CardFooter bg="#E4E4EB" borderRadius="0px 0px 8px 8px" paddingX="30px">
         <Flex align="center" justify="space-between" w="100%">
           <Flex gap="6px">
-            <Button padding="10px" bg="white">
+            <Button padding="10px" bg="white" onClick={() => onModalOpen(true)}>
               <FiEdit3 />
             </Button>
             <Button padding="10px" bg="white">
