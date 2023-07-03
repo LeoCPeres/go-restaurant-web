@@ -4,13 +4,10 @@ import { colors } from "@/styles/colors";
 import { formatPrice } from "@/util/format";
 import { FiEdit3, FiTrash } from "react-icons/fi";
 import {
-  Box,
   Button,
-  ButtonGroup,
   Card,
   CardBody,
   CardFooter,
-  Divider,
   Heading,
   Stack,
   Text,
@@ -18,23 +15,42 @@ import {
   Flex,
   Switch,
   useDisclosure,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCloseButton,
+  AlertDialogBody,
+  AlertDialogFooter,
 } from "@chakra-ui/react";
+import { FoodProps } from "@/types/FoodTypes";
+import React, { RefObject, useState } from "react";
 
 type FoodCardProps = {
-  onModalOpen: (isEditing: boolean) => void;
+  foodProps: FoodProps;
+  onModalOpen: (isEditing: boolean, foodId?: string) => void;
+  onDelete: (foodId: string) => void;
+  onChangeAvailable: (foodId: string) => void;
 };
 
-export function FoodCard({ onModalOpen }: FoodCardProps) {
+export function FoodCard({
+  onModalOpen,
+  foodProps,
+  onDelete,
+  onChangeAvailable,
+}: FoodCardProps) {
   const {
     isOpen: isDeleteOpen,
-    onOpen: onEditOpen,
-    onClose: onEditClose,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
   } = useDisclosure();
+
+  const cancelRef = React.useRef();
 
   return (
     <Card maxW="sm" borderRadius="8px">
       <Image
-        src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+        src={foodProps?.image}
         alt="Green double couch with wooden legs"
         h="198px"
         objectFit="cover"
@@ -43,34 +59,67 @@ export function FoodCard({ onModalOpen }: FoodCardProps) {
       />
       <CardBody margin="0" bg="#F0F0F5" paddingX="30px">
         <Stack spacing="16px">
-          <Heading size="md">Living room Sofa</Heading>
-          <Text>
-            This sofa is perfect for modern tropical spaces, baroque inspired
-            spaces, earthy toned spaces and for people who love a chic design
-            with a sprinkle of vintage design.
-          </Text>
+          <Heading size="md">{foodProps.name}</Heading>
+          <Text>{foodProps.description}</Text>
           <Text color={colors.darkGreen} fontSize="2xl" fontWeight="bold">
-            {formatPrice(450)}
+            {formatPrice(foodProps.price ?? 0)}
           </Text>
         </Stack>
       </CardBody>
       <CardFooter bg="#E4E4EB" borderRadius="0px 0px 8px 8px" paddingX="30px">
         <Flex align="center" justify="space-between" w="100%">
           <Flex gap="6px">
-            <Button padding="10px" bg="white" onClick={() => onModalOpen(true)}>
+            <Button
+              padding="10px"
+              bg="white"
+              onClick={() => onModalOpen(true, foodProps.id)}
+            >
               <FiEdit3 />
             </Button>
-            <Button padding="10px" bg="white">
+            <Button padding="10px" bg="white" onClick={() => onDeleteOpen()}>
               <FiTrash />
             </Button>
           </Flex>
 
           <Flex fontSize="16px" fontWeight="400" align="center" gap="12px">
             <Text>Disponível</Text>
-            <Switch size="lg" colorScheme="green" />
+            <Switch
+              size="lg"
+              colorScheme="green"
+              onChange={() => onChangeAvailable(foodProps.id)}
+              isChecked={foodProps.available}
+            />
           </Flex>
         </Flex>
       </CardFooter>
+
+      <AlertDialog
+        motionPreset="scale"
+        onClose={onDeleteClose}
+        leastDestructiveRef={cancelRef as unknown as RefObject<HTMLElement>}
+        isOpen={isDeleteOpen}
+        isCentered
+      >
+        <AlertDialogOverlay />
+
+        <AlertDialogContent>
+          <AlertDialogHeader>Deletar prato?</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            Você tem certeza que deseja deletar este prato?
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button onClick={onDeleteClose}>Não</Button>
+            <Button
+              colorScheme="red"
+              ml={3}
+              onClick={() => onDelete(foodProps?.id)}
+            >
+              Sim
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
