@@ -2,13 +2,14 @@
 
 import { colors } from "@/styles/colors";
 import { Image } from "@chakra-ui/next-js";
-import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Text, useDisclosure } from "@chakra-ui/react";
 
 type NavbarProps = {
-  onModalOpen: (isEditing: boolean) => void;
+  onFoodModalOpen: (isEditing: boolean) => void;
+  onCategoryModalOpen: (isEditing: boolean) => void;
 };
 
-export function Navbar({ onModalOpen }: NavbarProps) {
+export function Navbar({ onFoodModalOpen, onCategoryModalOpen }: NavbarProps) {
   return (
     <Flex
       justify="space-between"
@@ -23,21 +24,38 @@ export function Navbar({ onModalOpen }: NavbarProps) {
         width={308}
         height={62}
       />
-      <Button
-        bg={colors.darkGreen}
-        color="white"
-        colorScheme="none"
-        transition={"filter 0.2s"}
-        _hover={{ filter: "brightness(0.9)" }}
-        paddingY="16px"
-        paddingX="24px"
-        gap="8px"
-        textAlign="center"
-        onClick={() => onModalOpen(false)}
-      >
-        <Text fontSize="16px">Novo Prato</Text>
-        <Image src="/icons/plus.svg" alt="plus" width={6} height={6} />
-      </Button>
+      <Flex gap="1rem">
+        <Button
+          bg={colors.darkGreen}
+          color="white"
+          colorScheme="none"
+          transition={"filter 0.2s"}
+          _hover={{ filter: "brightness(0.9)" }}
+          paddingY="16px"
+          paddingX="24px"
+          gap="8px"
+          textAlign="center"
+          onClick={() => onCategoryModalOpen(false)}
+        >
+          <Text fontSize="16px">Nova Categoria</Text>
+          <Image src="/icons/plus.svg" alt="plus" width={6} height={6} />
+        </Button>
+        <Button
+          bg={colors.darkGreen}
+          color="white"
+          colorScheme="none"
+          transition={"filter 0.2s"}
+          _hover={{ filter: "brightness(0.9)" }}
+          paddingY="16px"
+          paddingX="24px"
+          gap="8px"
+          textAlign="center"
+          onClick={() => onFoodModalOpen(false)}
+        >
+          <Text fontSize="16px">Novo Prato</Text>
+          <Image src="/icons/plus.svg" alt="plus" width={6} height={6} />
+        </Button>
+      </Flex>
     </Flex>
   );
 }

@@ -39,7 +39,7 @@ type FormValues = {
   file_: FileList;
 };
 
-export function Modal({
+export function FoodModal({
   isOpen,
   onClose,
   isEditing,

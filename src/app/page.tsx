@@ -6,7 +6,7 @@ import notFoundAnimation from "@/animations/not-found.json";
 import loadingAnimation from "@/animations/loader.json";
 
 import { FoodCard } from "@/components/FoodCard";
-import { Modal } from "@/components/Modal";
+import { FoodModal } from "@/components/FoodModal";
 import { Navbar } from "@/components/Navbar";
 import { colors } from "@/styles/colors";
 import { FoodProps } from "@/types/FoodTypes";
@@ -19,12 +19,25 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Lottie from "react-lottie";
+import { CategoryProps } from "@/types/CategoryTypes";
+import { CategoryModal } from "@/components/CategoryModal";
 
 export default function Home() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isFoodModalOpen,
+    onOpen: onFoodModalOpen,
+    onClose: onFoodModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isCategoryModalOpen,
+    onOpen: onCategoryModalOpen,
+    onClose: onCategoryModalClose,
+  } = useDisclosure();
+
   const [isEditing, setIsEditing] = useState(false);
   const [foodEditing, setFoodEditing] = useState<FoodProps>();
   const [foodList, setFoodList] = useState<FoodProps[]>([]);
+  const [categoryList, setCategoryList] = useState<CategoryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const notFoundOptions = {
@@ -45,7 +58,7 @@ export default function Home() {
     },
   };
 
-  function handleOpenModal(isEditing: boolean, foodId?: string) {
+  function handleOpenFoodModal(isEditing: boolean, foodId?: string) {
     setIsEditing(isEditing);
 
     if (isEditing) {
@@ -55,7 +68,20 @@ export default function Home() {
       setFoodEditing(undefined);
     }
 
-    onOpen();
+    onFoodModalOpen();
+  }
+
+  function handleOpenCategoryModal(isEditing: boolean, categoryId?: string) {
+    setIsEditing(isEditing);
+
+    if (isEditing) {
+      const food = foodList.find((category) => category.id === categoryId);
+      setFoodEditing(food);
+    } else {
+      setFoodEditing(undefined);
+    }
+
+    onCategoryModalOpen();
   }
 
   function renderFoodList() {
@@ -106,7 +132,7 @@ export default function Home() {
             color="white"
             colorScheme="none"
             mt="1rem"
-            onClick={() => handleOpenModal(false)}
+            onClick={() => handleOpenFoodModal(false)}
           >
             Cadastrar novo prato
           </Button>
@@ -117,7 +143,9 @@ export default function Home() {
     return foodList?.map((food) => (
       <FoodCard
         key={food.id}
-        onModalOpen={(isEditing, foodId) => handleOpenModal(isEditing, foodId)}
+        onModalOpen={(isEditing, foodId) =>
+          handleOpenFoodModal(isEditing, foodId)
+        }
         foodProps={food}
         onDelete={(foodId) => handleDeleteFood(foodId)}
         onChangeAvailable={(foodId) => handleChangeAvailability(foodId)}
@@ -174,7 +202,10 @@ export default function Home() {
 
   return (
     <Flex direction="column" w="100%" h="100%">
-      <Navbar onModalOpen={(e) => handleOpenModal(e)} />
+      <Navbar
+        onFoodModalOpen={(e) => handleOpenFoodModal(e)}
+        onCategoryModalOpen={(e) => handleOpenCategoryModal(e)}
+      />
 
       <Box w="100%" bg={colors.primary} h="154px" />
 
@@ -191,13 +222,17 @@ export default function Home() {
         }
       >
         {renderFoodList()}
-        <Modal
-          isOpen={isOpen}
-          onClose={onClose}
+        <FoodModal
+          isOpen={isFoodModalOpen}
+          onClose={onFoodModalClose}
           isEditing={isEditing}
           foodProps={foodEditing}
           onAddFood={(food) => handleAddFood(food)}
           onEditFood={(food) => handleUpdateFood(food)}
+        />
+        <CategoryModal
+          isOpen={isCategoryModalOpen}
+          onClose={onCategoryModalClose}
         />
       </SimpleGrid>
     </Flex>
