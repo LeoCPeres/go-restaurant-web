@@ -19,8 +19,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Lottie from "react-lottie";
-import { CategoryProps } from "@/types/CategoryTypes";
-import { CategoryModal } from "@/components/CategoryModal";
 
 export default function Home() {
   const {
@@ -37,7 +35,6 @@ export default function Home() {
   const [isEditing, setIsEditing] = useState(false);
   const [foodEditing, setFoodEditing] = useState<FoodProps>();
   const [foodList, setFoodList] = useState<FoodProps[]>([]);
-  const [categoryList, setCategoryList] = useState<CategoryProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const notFoundOptions = {
@@ -202,10 +199,7 @@ export default function Home() {
 
   return (
     <Flex direction="column" w="100%" h="100%">
-      <Navbar
-        onFoodModalOpen={(e) => handleOpenFoodModal(e)}
-        onCategoryModalOpen={(e) => handleOpenCategoryModal(e)}
-      />
+      <Navbar onFoodModalOpen={(e) => handleOpenFoodModal(e)} />
 
       <Box w="100%" bg={colors.primary} h="154px" />
 
@@ -229,10 +223,6 @@ export default function Home() {
           foodProps={foodEditing}
           onAddFood={(food) => handleAddFood(food)}
           onEditFood={(food) => handleUpdateFood(food)}
-        />
-        <CategoryModal
-          isOpen={isCategoryModalOpen}
-          onClose={onCategoryModalClose}
         />
       </SimpleGrid>
     </Flex>

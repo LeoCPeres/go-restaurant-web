@@ -1,3 +1,5 @@
+import { IngredientProps } from "./IngredientTypes";
+
 export type FoodProps = {
   id: string;
   name: string;
@@ -5,4 +7,6 @@ export type FoodProps = {
   price: number;
   available: boolean;
   image: string;
+  ingredientsList?: IngredientProps[];
+  foodCategory: string;
 };

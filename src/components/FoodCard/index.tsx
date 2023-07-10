@@ -82,7 +82,11 @@ export function FoodCard({
           </Flex>
 
           <Flex fontSize="16px" fontWeight="400" align="center" gap="12px">
-            <Text>Disponível</Text>
+            {foodProps.available ? (
+              <Text>Disponível</Text>
+            ) : (
+              <Text>Indisponível</Text>
+            )}
             <Switch
               size="lg"
               colorScheme="green"

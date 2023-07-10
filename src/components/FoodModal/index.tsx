@@ -15,15 +15,43 @@ import {
   Input,
   FormHelperText,
   Textarea,
+  Text,
+  Divider,
+  TableContainer,
+  Table,
+  TableCaption,
+  Thead,
+  Tr,
+  Th,
+  Tfoot,
+  Td,
+  Tbody,
+  useDisclosure,
+  Tooltip,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCloseButton,
+  AlertDialogBody,
+  AlertDialogFooter,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
 } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, RefObject } from "react";
 import { ImageUploader } from "../ImageUploader";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { colors } from "@/styles/colors";
 import { FoodProps } from "@/types/FoodTypes";
 import { formatPrice } from "@/util/format";
 import { unformatPrice } from "@/util/unformat";
 import { FileTypes } from "@/types/FileTypes";
+import { IngredientProps } from "@/types/IngredientTypes";
+import { FiChevronDown, FiEdit3, FiTrash } from "react-icons/fi";
+import { generateGUID } from "@/util/genUID";
+import { IngredientsTable } from "../IngredientsTable";
 
 type ModalProps = {
   isOpen: boolean;
@@ -70,24 +98,15 @@ export function FoodModal({
   const [foodName, setFoodName] = useState<string>("");
   const [foodPrice, setFoodPrice] = useState<number>(0);
   const [foodDescription, setFoodDescription] = useState<string>("");
+  const [foodCategory, setFoodCategory] = useState<string>("");
+
+  const [ingredients, setIngredients] = useState<IngredientProps[]>([]);
 
   function clearData() {
     setFoodName("");
     setFoodPrice(0);
     setFoodDescription("");
-  }
-
-  function generateGUID() {
-    let dt = new Date().getTime();
-    const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      function (c) {
-        const r = (dt + Math.random() * 16) % 16 | 0;
-        dt = Math.floor(dt / 16);
-        return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
-      }
-    );
-    return uuid;
+    setIngredients([]);
   }
 
   function onSubmit() {
@@ -98,6 +117,8 @@ export function FoodModal({
       description: foodDescription,
       image: files?.base64 ?? foodProps?.image,
       available: true,
+      ingredientsList: ingredients,
+      foodCategory: foodCategory,
     } as FoodProps;
 
     if (isEditing) {
@@ -117,6 +138,8 @@ export function FoodModal({
       setFoodPrice(foodProps?.price);
       setFoodDescription(foodProps?.description);
       setFiles({ base64: foodProps?.image, name: foodProps?.id });
+      setIngredients(foodProps?.ingredientsList ?? []);
+      setFoodCategory(foodProps?.foodCategory ?? "");
     }
   }, [foodProps]);
 
@@ -145,7 +168,7 @@ export function FoodModal({
           )}
 
           <Flex mt="1rem" gap="1rem">
-            <FormControl w="70%">
+            <FormControl w="100%">
               <FormLabel>Nome do prato</FormLabel>
               <Input
                 type="text"
@@ -154,7 +177,7 @@ export function FoodModal({
                 onChange={(e) => setFoodName(e.target.value)}
               />
             </FormControl>
-            <FormControl w="30%">
+            <FormControl w="25%">
               <FormLabel>Preço</FormLabel>
               <Input
                 type="text"
@@ -162,6 +185,31 @@ export function FoodModal({
                 value={formatPrice(foodPrice)}
                 onChange={(e) => setFoodPrice(unformatPrice(e.target.value))}
               />
+            </FormControl>
+            <FormControl w="20%">
+              <FormLabel>Categoria</FormLabel>
+              <Menu>
+                <MenuButton as={Button} rightIcon={<FiChevronDown />}>
+                  {foodCategory ? foodCategory : "Selecione"}
+                </MenuButton>
+                <MenuList>
+                  <MenuItem onClick={() => setFoodCategory("Massas")}>
+                    Massas
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Pizzas")}>
+                    Pizzas
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Carnes")}>
+                    Carnes
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Caldos")}>
+                    Caldos
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Porções")}>
+                    Porções
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </FormControl>
           </Flex>
 
@@ -174,6 +222,11 @@ export function FoodModal({
               placeholder="Ex: Macarrão ao dente ao molho bolognese"
             />
           </FormControl>
+
+          <IngredientsTable
+            ingredients={ingredients}
+            setIngredients={(e) => setIngredients(e)}
+          />
         </ModalBody>
         <ModalFooter>
           <Button

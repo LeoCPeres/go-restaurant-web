@@ -12,6 +12,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>GoRestaurant - Web</title>
+      </head>
+
       <body>
         <Providers>{children}</Providers>
       </body>
