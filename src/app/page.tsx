@@ -19,6 +19,16 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Lottie from "react-lottie";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { dbFirebase } from "@/services/firebase";
+import { Toaster } from "react-hot-toast";
 
 export default function Home() {
   const {
@@ -145,7 +155,9 @@ export default function Home() {
         }
         foodProps={food}
         onDelete={(foodId) => handleDeleteFood(foodId)}
-        onChangeAvailable={(foodId) => handleChangeAvailability(foodId)}
+        onChangeAvailable={(foodId, available) =>
+          handleChangeAvailability(foodId, available)
+        }
       />
     ));
   }
@@ -154,51 +166,32 @@ export default function Home() {
     setFoodList([...foodList, food]);
   }
 
-  function handleUpdateFood(food: FoodProps) {
-    const updatedFoodList = foodList.map((foodItem) => {
-      if (foodItem.id === food.id) {
-        return food;
-      }
-
-      return foodItem;
-    });
-
-    setFoodList(updatedFoodList);
+  async function handleDeleteFood(foodId: string) {
+    await deleteDoc(doc(dbFirebase, "foods", foodId));
   }
 
-  function handleDeleteFood(foodId: string) {
-    const updatedFoodList = foodList.filter((foodItem) => {
-      if (foodItem.id !== foodId) {
-        return foodItem;
-      }
+  async function handleChangeAvailability(foodId: string, available: boolean) {
+    const foodDocRef = doc(dbFirebase, "foods", foodId);
+    await updateDoc(foodDocRef, {
+      available: !available,
     });
-
-    setFoodList(updatedFoodList);
-  }
-
-  function handleChangeAvailability(foodId: string) {
-    const updatedFoodList = foodList.map((foodItem) => {
-      if (foodItem.id === foodId) {
-        return {
-          ...foodItem,
-          available: !foodItem.available,
-        };
-      }
-
-      return foodItem;
-    });
-
-    setFoodList(updatedFoodList);
   }
 
   useMemo(() => {
-    setTimeout(() => {
+    const unsubscribe = onSnapshot(collection(dbFirebase, "foods"), (snap) => {
+      setIsLoading(true);
+      const docs = snap.docs.map((doc) => doc.data() as FoodProps);
+
+      setFoodList(docs);
       setIsLoading(false);
-    }, 2000);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
     <Flex direction="column" w="100%" h="100%">
+      <Toaster />
       <Navbar onFoodModalOpen={(e) => handleOpenFoodModal(e)} />
 
       <Box w="100%" bg={colors.primary} h="154px" />
@@ -222,7 +215,6 @@ export default function Home() {
           isEditing={isEditing}
           foodProps={foodEditing}
           onAddFood={(food) => handleAddFood(food)}
-          onEditFood={(food) => handleUpdateFood(food)}
         />
       </SimpleGrid>
     </Flex>

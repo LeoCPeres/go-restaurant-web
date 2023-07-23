@@ -13,34 +13,13 @@ import {
   FormControl,
   FormLabel,
   Input,
-  FormHelperText,
   Textarea,
-  Text,
-  Divider,
-  TableContainer,
-  Table,
-  TableCaption,
-  Thead,
-  Tr,
-  Th,
-  Tfoot,
-  Td,
-  Tbody,
-  useDisclosure,
-  Tooltip,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogCloseButton,
-  AlertDialogBody,
-  AlertDialogFooter,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
 } from "@chakra-ui/react";
-import React, { useMemo, useState, RefObject } from "react";
+import React, { useMemo, useState } from "react";
 import { ImageUploader } from "../ImageUploader";
 import { useForm } from "react-hook-form";
 import { colors } from "@/styles/colors";
@@ -49,9 +28,19 @@ import { formatPrice } from "@/util/format";
 import { unformatPrice } from "@/util/unformat";
 import { FileTypes } from "@/types/FileTypes";
 import { IngredientProps } from "@/types/IngredientTypes";
-import { FiChevronDown, FiEdit3, FiTrash } from "react-icons/fi";
+import { FiChevronDown } from "react-icons/fi";
 import { generateGUID } from "@/util/genUID";
 import { IngredientsTable } from "../IngredientsTable";
+import toast, { Toaster } from "react-hot-toast";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { dbFirebase } from "@/services/firebase";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
 
 type ModalProps = {
   isOpen: boolean;
@@ -60,7 +49,6 @@ type ModalProps = {
 
   onClose: () => void;
   onAddFood: (food: FoodProps) => void;
-  onEditFood: (food: FoodProps) => void;
 };
 
 type FormValues = {
@@ -73,7 +61,6 @@ export function FoodModal({
   isEditing,
   foodProps,
   onAddFood,
-  onEditFood,
 }: ModalProps) {
   const {
     register,
@@ -94,6 +81,8 @@ export function FoodModal({
     return true;
   };
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [files, setFiles] = useState<FileTypes>();
   const [foodName, setFoodName] = useState<string>("");
   const [foodPrice, setFoodPrice] = useState<number>(0);
@@ -107,28 +96,71 @@ export function FoodModal({
     setFoodPrice(0);
     setFoodDescription("");
     setIngredients([]);
+    setFoodCategory("");
   }
 
-  function onSubmit() {
+  async function onSubmit() {
+    if (foodCategory == "") return toast.error("Selecione uma categoria");
+    if (!files) return toast.error("Selecione uma imagem");
+    if (foodName == "") return toast.error("Digite um nome");
+    if (foodPrice == 0) return toast.error("Digite um preço");
+    if (foodDescription == "") return toast.error("Digite uma descrição");
+    setIsLoading(true);
+
+    const storage = getStorage();
+    const foodImageRef = ref(storage, files.name);
+    let imageUrl = null;
+
+    console.log(files.base64);
+
+    if (isEditing && files.base64) {
+      const uploadTask = uploadString(foodImageRef, files.base64, "data_url");
+
+      await getDownloadURL((await uploadTask).ref).then((url) => {
+        imageUrl = url;
+      });
+    }
+
+    if (!isEditing) {
+      const uploadTask = uploadString(foodImageRef, files.base64, "data_url");
+
+      await getDownloadURL((await uploadTask).ref).then((url) => {
+        imageUrl = url;
+      });
+    }
+
     const food = {
       id: foodProps?.id ?? generateGUID(),
       name: foodName,
       price: foodPrice,
       description: foodDescription,
-      image: files?.base64 ?? foodProps?.image,
+      image: imageUrl != null ? imageUrl : foodProps?.image,
       available: true,
       ingredientsList: ingredients,
       foodCategory: foodCategory,
     } as FoodProps;
 
     if (isEditing) {
-      onEditFood(food);
-    } else {
-      onAddFood(food);
+      await updateDoc(doc(dbFirebase, "foods", food.id), food);
+      setIsLoading(false);
+      toast.success("Prato editado com sucesso!");
+      clearData();
+      onClose();
+      return;
     }
 
-    clearData();
-    onClose();
+    await setDoc(doc(dbFirebase, "foods", food.id), food)
+      .then(() => {
+        toast.success("Prato cadastrado com sucesso!");
+        clearData();
+        onClose();
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        toast.error("Erro ao cadastrar prato!");
+        console.log(error);
+        setIsLoading(false);
+      });
   }
 
   useMemo(() => {
@@ -234,6 +266,7 @@ export function FoodModal({
             color="white"
             colorScheme="none"
             onClick={onSubmit}
+            isLoading={isLoading}
           >
             Salvar
           </Button>

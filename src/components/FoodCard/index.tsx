@@ -30,7 +30,7 @@ type FoodCardProps = {
   foodProps: FoodProps;
   onModalOpen: (isEditing: boolean, foodId?: string) => void;
   onDelete: (foodId: string) => void;
-  onChangeAvailable: (foodId: string) => void;
+  onChangeAvailable: (foodId: string, available: boolean) => void;
 };
 
 export function FoodCard({
@@ -51,7 +51,7 @@ export function FoodCard({
     <Card maxW="sm" borderRadius="8px">
       <Image
         src={foodProps?.image}
-        alt="Green double couch with wooden legs"
+        alt={foodProps?.description}
         h="198px"
         objectFit="cover"
         w="100%"
@@ -90,7 +90,9 @@ export function FoodCard({
             <Switch
               size="lg"
               colorScheme="green"
-              onChange={() => onChangeAvailable(foodProps.id)}
+              onChange={() =>
+                onChangeAvailable(foodProps.id, foodProps.available)
+              }
               isChecked={foodProps.available}
             />
           </Flex>
