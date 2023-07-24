@@ -111,9 +111,7 @@ export function FoodModal({
     const foodImageRef = ref(storage, files.name);
     let imageUrl = null;
 
-    console.log(files.base64);
-
-    if (isEditing && files.base64) {
+    if (isEditing && !files.base64.includes("firebase")) {
       const uploadTask = uploadString(foodImageRef, files.base64, "data_url");
 
       await getDownloadURL((await uploadTask).ref).then((url) => {
@@ -161,6 +159,8 @@ export function FoodModal({
         console.log(error);
         setIsLoading(false);
       });
+
+    setIsLoading(false);
   }
 
   useMemo(() => {
