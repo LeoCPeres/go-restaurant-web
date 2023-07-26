@@ -55,6 +55,48 @@ type FormValues = {
   file_: FileList;
 };
 
+const whichCategoryByName = (category: string) => {
+  switch (category) {
+    case "Massas":
+      return "1";
+    case "Pizzas":
+      return "2";
+    case "Carnes":
+      return "3";
+    case "Caldos":
+      return "4";
+    case "Porções":
+      return "5";
+    case "Sobremesas":
+      return "6";
+    case "Vegano":
+      return "7";
+    default:
+      return "8";
+  }
+};
+
+const whichCategoryById = (category: string) => {
+  switch (category) {
+    case "1":
+      return "Massas";
+    case "2":
+      return "Pizzas";
+    case "3":
+      return "Carnes";
+    case "4":
+      return "Caldos";
+    case "5":
+      return "Porções";
+    case "6":
+      return "Sobremesas";
+    case "7":
+      return "Vegano";
+    default:
+      return "";
+  }
+};
+
 export function FoodModal({
   isOpen,
   onClose,
@@ -135,7 +177,7 @@ export function FoodModal({
       image: imageUrl != null ? imageUrl : foodProps?.image,
       available: true,
       ingredientsList: ingredients,
-      foodCategory: foodCategory,
+      foodCategory: whichCategoryByName(foodCategory),
     } as FoodProps;
 
     if (isEditing) {
@@ -171,7 +213,7 @@ export function FoodModal({
       setFoodDescription(foodProps?.description);
       setFiles({ base64: foodProps?.image, name: foodProps?.id });
       setIngredients(foodProps?.ingredientsList ?? []);
-      setFoodCategory(foodProps?.foodCategory ?? "");
+      setFoodCategory(whichCategoryById(foodProps?.foodCategory) ?? "");
     }
   }, [foodProps]);
 
@@ -239,6 +281,12 @@ export function FoodModal({
                   </MenuItem>
                   <MenuItem onClick={() => setFoodCategory("Porções")}>
                     Porções
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Sobremesas")}>
+                    Sobremesas
+                  </MenuItem>
+                  <MenuItem onClick={() => setFoodCategory("Vegano")}>
+                    Vegano
                   </MenuItem>
                 </MenuList>
               </Menu>
